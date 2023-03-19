@@ -4,7 +4,8 @@ Web application for experimenting with Bézier Curves and visualizing their cons
 Currently draws a curve between points defined by mouseclicks
 
 planned features:
-- [ ] add touchscreen support
-- [ ] drop points on mouse release, handle moving to edge of canvas
-- [ ] allow users to 
-- [ ] toggle drawing of intermediate linear interpolations
+- [x] add touchscreen support
+- [x] drop points on mouse release, handle moving to edge of canvas
+- [x] allow users to delete arbitrary points 
+- [x] toggle drawing of intermediate linear interpolations/curves
+- [ ] animation options

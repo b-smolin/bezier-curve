@@ -47,6 +47,7 @@ class BezierCurveTool{
     private points: Point[];
     private currentPoint: Point;
     private toggleDetail: HTMLInputElement;
+    private deleteMode: HTMLInputElement;
 
     constructor() {
         let canvas = document.getElementById('canvas') as
@@ -61,6 +62,7 @@ class BezierCurveTool{
         this.context = context;
         this.points = [];
         this.toggleDetail = document.getElementById("toggle") as HTMLInputElement;
+        this.deleteMode = document.getElementById("delete") as HTMLInputElement;
 
         this.redraw();
         this.createUserEvents();
@@ -117,19 +119,20 @@ class BezierCurveTool{
         let groupSize = 1;
         let s = this.points.length;
         while (groupSize < s){
+            this.context.globalAlpha = groupSize * (1/(s*2));
             for (let i = 0 ; i+groupSize < s ; i++){
-                // groupsize * quantum for alpha?
                 let curve = this.getCurve(this.points.slice(i,i+groupSize+1))
                 let len = curve.length
-                for (let i = 1 ; i < len ; i++){
+                for (let i = 0 ; i < len ; i++){
                     context.beginPath();
-                    context.moveTo(curve[i-1].x, curve[i-1].y);
+                    // context.moveTo(curve[i-1].x, curve[i-1].y); could set i to 1 and uncomment to draw lines
                     context.lineTo(curve[i].x, curve[i].y);
                     context.stroke();
                }
             }
             groupSize += 1;
         }
+        this.context.globalAlpha = 1;
     }
 
     //at time this is called we are within if-block where this.points >= 2 len
@@ -156,19 +159,20 @@ class BezierCurveTool{
         x -= this.canvas.offsetLeft;
         y -= this.canvas.offsetTop;
         let i = this.points.findIndex((point) => {
-            console.log(point);
-            console.log(pointDistance(point, new Point(x, y)));
             return pointDistance(point, new Point(x, y)) < POINTRADIUS;
         })
-        if(i < 0){
+        if(i < 0 && !this.deleteMode.checked){
             this.points.push(new Point(x, y))
             this.currentPoint = this.points[this.points.length-1];
-            this.redraw();
+        }
+        else if(this.deleteMode.checked){
+            this.points.splice(i,1);
         }else{
             this.currentPoint = this.points[i];
             this.currentPoint.x = x;
             this.currentPoint.y = y;
         }
+        this.redraw();
     }
 
     private dragHandler = (e: MouseEvent | TouchEvent) => {

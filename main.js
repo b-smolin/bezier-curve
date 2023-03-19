@@ -65,19 +65,20 @@ var BezierCurveTool = /** @class */ (function () {
             var groupSize = 1;
             var s = _this.points.length;
             while (groupSize < s) {
+                _this.context.globalAlpha = groupSize * (1 / (s * 2));
                 for (var i = 0; i + groupSize < s; i++) {
-                    // groupsize * quantum for alpha?
                     var curve = _this.getCurve(_this.points.slice(i, i + groupSize + 1));
                     var len = curve.length;
-                    for (var i_1 = 1; i_1 < len; i_1++) {
+                    for (var i_1 = 0; i_1 < len; i_1++) {
                         context.beginPath();
-                        context.moveTo(curve[i_1 - 1].x, curve[i_1 - 1].y);
+                        // context.moveTo(curve[i-1].x, curve[i-1].y); could set i to 1 and uncomment to draw lines
                         context.lineTo(curve[i_1].x, curve[i_1].y);
                         context.stroke();
                     }
                 }
                 groupSize += 1;
             }
+            _this.context.globalAlpha = 1;
         };
         //at time this is called we are within if-block where this.points >= 2 len
         this.getCurve = function (points) {
@@ -101,20 +102,21 @@ var BezierCurveTool = /** @class */ (function () {
             x -= _this.canvas.offsetLeft;
             y -= _this.canvas.offsetTop;
             var i = _this.points.findIndex(function (point) {
-                console.log(point);
-                console.log(pointDistance(point, new Point(x, y)));
                 return pointDistance(point, new Point(x, y)) < POINTRADIUS;
             });
-            if (i < 0) {
+            if (i < 0 && !_this.deleteMode.checked) {
                 _this.points.push(new Point(x, y));
                 _this.currentPoint = _this.points[_this.points.length - 1];
-                _this.redraw();
+            }
+            else if (_this.deleteMode.checked) {
+                _this.points.splice(i, 1);
             }
             else {
                 _this.currentPoint = _this.points[i];
                 _this.currentPoint.x = x;
                 _this.currentPoint.y = y;
             }
+            _this.redraw();
         };
         this.dragHandler = function (e) {
             if (_this.currentPoint) {
@@ -145,6 +147,7 @@ var BezierCurveTool = /** @class */ (function () {
         this.context = context;
         this.points = [];
         this.toggleDetail = document.getElementById("toggle");
+        this.deleteMode = document.getElementById("delete");
         this.redraw();
         this.createUserEvents();
     }

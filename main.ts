@@ -1,3 +1,5 @@
+const POINTRADIUS = 7;
+
 class Point{
     x: number;
     y: number;
@@ -30,6 +32,12 @@ function weightedAdd(t1: number, p1: Point, t2: number, p2: Point){
     let x2 = t2*p2.x;
     let y2 = t2*p2.y;
     return new Point((x1+x2),(y1+y2));
+}
+
+function pointDistance(p1: Point, p2: Point): Number{
+    let xDelta = p1.x - p2.x;
+    let yDelta = p1.y - p2.y;
+    return Math.sqrt((xDelta**2 + yDelta**2));
 }
 
 
@@ -65,6 +73,8 @@ class BezierCurveTool{
         canvas.addEventListener("mouseout", this.upHandler);
         canvas.addEventListener("touchstart", this.pressHandler);
         canvas.addEventListener("touchmove", this.dragHandler);
+        canvas.addEventListener("touchcancel", this.upHandler);
+        canvas.addEventListener("touchend", this.upHandler);
         document.getElementById("clear").addEventListener("click", this.clearCanvasHandler);
     }
 
@@ -76,7 +86,7 @@ class BezierCurveTool{
         
         for (let i = 0 ; i < s ; i++){
             context.beginPath();
-            context.arc(points[i].x, points[i].y, 7, 0, 2*Math.PI);
+            context.arc(points[i].x, points[i].y, POINTRADIUS, 0, 2*Math.PI);
             context.fillStyle = (i == 0 || i == s-1) ? "red" : "yellow";
             context.fill();
             context.stroke();
@@ -114,23 +124,41 @@ class BezierCurveTool{
         let y = (e as TouchEvent).changedTouches ? 
             (e as TouchEvent).changedTouches[0].pageY : 
             (e as MouseEvent).pageY;
-        this.points.push(new Point(x, y))
-        this.currentPoint = this.points[this.points.length-1];
-        this.redraw();
+        x -= this.canvas.offsetLeft;
+        y -= this.canvas.offsetTop;
+        let i = this.points.findIndex((point) => {
+            console.log(point);
+            console.log(pointDistance(point, new Point(x, y)));
+            return pointDistance(point, new Point(x, y)) < POINTRADIUS;
+        })
+        if(i < 0){
+            this.points.push(new Point(x, y))
+            this.currentPoint = this.points[this.points.length-1];
+            this.redraw();
+        }else{
+            this.currentPoint = this.points[i];
+            this.currentPoint.x = x;
+            this.currentPoint.y = y;
+        }
     }
 
     private dragHandler = (e: MouseEvent | TouchEvent) => {
-        let x = (e as TouchEvent).changedTouches ? 
-            (e as TouchEvent).changedTouches[0].pageX : 
-            (e as MouseEvent).pageX;
-        let y = (e as TouchEvent).changedTouches ? 
-            (e as TouchEvent).changedTouches[0].pageY : 
-            (e as MouseEvent).pageY;
-        this.currentPoint.x = x;
-        this.currentPoint.y = y;
-        this.redraw();
+        if (this.currentPoint){
+            let x = (e as TouchEvent).changedTouches ? 
+                (e as TouchEvent).changedTouches[0].pageX : 
+                (e as MouseEvent).pageX;
+            let y = (e as TouchEvent).changedTouches ? 
+                (e as TouchEvent).changedTouches[0].pageY : 
+                (e as MouseEvent).pageY;
+            x -= this.canvas.offsetLeft;
+            y -= this.canvas.offsetTop;
+            this.currentPoint.x = x;
+            this.currentPoint.y = y;
+            this.redraw();
+        }
     }
 
+    //set center of current point to edge +- 1 in case of mouseout 
     private upHandler = () => {
         this.currentPoint = null;
     }

@@ -46,6 +46,7 @@ class BezierCurveTool{
     private context: CanvasRenderingContext2D;
     private points: Point[];
     private currentPoint: Point;
+    private toggleDetail: HTMLInputElement;
 
     constructor() {
         let canvas = document.getElementById('canvas') as
@@ -59,7 +60,7 @@ class BezierCurveTool{
         this.canvas = canvas;
         this.context = context;
         this.points = [];
-        this.currentPoint = null;
+        this.toggleDetail = document.getElementById("toggle") as HTMLInputElement;
 
         this.redraw();
         this.createUserEvents();
@@ -67,14 +68,17 @@ class BezierCurveTool{
 
     private createUserEvents(): void{
         let canvas = this.canvas
+
         canvas.addEventListener("mousedown", this.pressHandler);
         canvas.addEventListener("mousemove", this.dragHandler);
         canvas.addEventListener("mouseup", this.upHandler);
         canvas.addEventListener("mouseout", this.upHandler);
+
         canvas.addEventListener("touchstart", this.pressHandler);
         canvas.addEventListener("touchmove", this.dragHandler);
         canvas.addEventListener("touchcancel", this.upHandler);
         canvas.addEventListener("touchend", this.upHandler);
+
         document.getElementById("clear").addEventListener("click", this.clearCanvasHandler);
     }
 
@@ -91,23 +95,48 @@ class BezierCurveTool{
             context.fill();
             context.stroke();
         }
+        if (this.points.length < 2)
+            return;
 
-        if(this.points.length >= 2){
-           let curve = this.getCurve();
-           for (let i = 1 ; i < curve.length ; i++){
-                context.beginPath();
-                context.moveTo(curve[i-1].x, curve[i-1].y);
-                context.lineTo(curve[i].x, curve[i].y);
-                context.stroke();
-           }
+        if (this.toggleDetail.checked)
+            this.detailedDraw();
+        
+        let curve = this.getCurve(this.points);
+        s = curve.length;
+        for (let i = 1 ; i < s ; i++){
+             context.beginPath();
+             context.moveTo(curve[i-1].x, curve[i-1].y);
+             context.lineTo(curve[i].x, curve[i].y);
+             context.stroke();
+        }
+        
+    }
+
+    private detailedDraw = () => {
+        let context = this.context;
+        let groupSize = 1;
+        let s = this.points.length;
+        while (groupSize < s){
+            for (let i = 0 ; i+groupSize < s ; i++){
+                // groupsize * quantum for alpha?
+                let curve = this.getCurve(this.points.slice(i,i+groupSize+1))
+                let len = curve.length
+                for (let i = 1 ; i < len ; i++){
+                    context.beginPath();
+                    context.moveTo(curve[i-1].x, curve[i-1].y);
+                    context.lineTo(curve[i].x, curve[i].y);
+                    context.stroke();
+               }
+            }
+            groupSize += 1;
         }
     }
 
     //at time this is called we are within if-block where this.points >= 2 len
-    private getCurve = () =>{
+    private getCurve = (points: Point[]) => {
         let curve: Point[] = [];
         for (let t = 0.0 ; t <= 1.001 ; t += 0.005){
-            curve.push(deCasteljau(this.points, t))
+            curve.push(deCasteljau(points, t))
         }
         return curve;
     }
@@ -166,4 +195,3 @@ class BezierCurveTool{
 }
 
 let x = new BezierCurveTool();
-console.log(x)

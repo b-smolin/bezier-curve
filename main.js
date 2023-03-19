@@ -47,21 +47,43 @@ var BezierCurveTool = /** @class */ (function () {
                 context.fill();
                 context.stroke();
             }
-            if (_this.points.length >= 2) {
-                var curve = _this.getCurve();
-                for (var i = 1; i < curve.length; i++) {
-                    context.beginPath();
-                    context.moveTo(curve[i - 1].x, curve[i - 1].y);
-                    context.lineTo(curve[i].x, curve[i].y);
-                    context.stroke();
+            if (_this.points.length < 2)
+                return;
+            if (_this.toggleDetail.checked)
+                _this.detailedDraw();
+            var curve = _this.getCurve(_this.points);
+            s = curve.length;
+            for (var i = 1; i < s; i++) {
+                context.beginPath();
+                context.moveTo(curve[i - 1].x, curve[i - 1].y);
+                context.lineTo(curve[i].x, curve[i].y);
+                context.stroke();
+            }
+        };
+        this.detailedDraw = function () {
+            var context = _this.context;
+            var groupSize = 1;
+            var s = _this.points.length;
+            while (groupSize < s) {
+                for (var i = 0; i + groupSize < s; i++) {
+                    // groupsize * quantum for alpha?
+                    var curve = _this.getCurve(_this.points.slice(i, i + groupSize + 1));
+                    var len = curve.length;
+                    for (var i_1 = 1; i_1 < len; i_1++) {
+                        context.beginPath();
+                        context.moveTo(curve[i_1 - 1].x, curve[i_1 - 1].y);
+                        context.lineTo(curve[i_1].x, curve[i_1].y);
+                        context.stroke();
+                    }
                 }
+                groupSize += 1;
             }
         };
         //at time this is called we are within if-block where this.points >= 2 len
-        this.getCurve = function () {
+        this.getCurve = function (points) {
             var curve = [];
             for (var t = 0.0; t <= 1.001; t += 0.005) {
-                curve.push(deCasteljau(_this.points, t));
+                curve.push(deCasteljau(points, t));
             }
             return curve;
         };
@@ -122,7 +144,7 @@ var BezierCurveTool = /** @class */ (function () {
         this.canvas = canvas;
         this.context = context;
         this.points = [];
-        this.currentPoint = null;
+        this.toggleDetail = document.getElementById("toggle");
         this.redraw();
         this.createUserEvents();
     }
@@ -141,5 +163,4 @@ var BezierCurveTool = /** @class */ (function () {
     return BezierCurveTool;
 }());
 var x = new BezierCurveTool();
-console.log(x);
 //# sourceMappingURL=main.js.map

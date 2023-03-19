@@ -63,9 +63,30 @@ var BezierCurveTool = /** @class */ (function () {
             _this.points = [];
             _this.context.clearRect(0, 0, _this.canvas.width, _this.canvas.height);
         };
-        this.newPointHandler = function (e) {
-            _this.points.push(new Point(e.pageX, e.pageY));
+        this.pressHandler = function (e) {
+            var x = e.changedTouches ?
+                e.changedTouches[0].pageX :
+                e.pageX;
+            var y = e.changedTouches ?
+                e.changedTouches[0].pageY :
+                e.pageY;
+            _this.points.push(new Point(x, y));
+            _this.currentPoint = _this.points[_this.points.length - 1];
             _this.redraw();
+        };
+        this.dragHandler = function (e) {
+            var x = e.changedTouches ?
+                e.changedTouches[0].pageX :
+                e.pageX;
+            var y = e.changedTouches ?
+                e.changedTouches[0].pageY :
+                e.pageY;
+            _this.currentPoint.x = x;
+            _this.currentPoint.y = y;
+            _this.redraw();
+        };
+        this.upHandler = function () {
+            _this.currentPoint = null;
         };
         var canvas = document.getElementById('canvas');
         var context = canvas.getContext("2d");
@@ -76,13 +97,18 @@ var BezierCurveTool = /** @class */ (function () {
         this.canvas = canvas;
         this.context = context;
         this.points = [];
+        this.currentPoint = null;
         this.redraw();
         this.createUserEvents();
     }
     BezierCurveTool.prototype.createUserEvents = function () {
         var canvas = this.canvas;
-        canvas.addEventListener("mousedown", this.newPointHandler);
-        canvas.addEventListener("touchstart", this.newPointHandler);
+        canvas.addEventListener("mousedown", this.pressHandler);
+        canvas.addEventListener("mousemove", this.dragHandler);
+        canvas.addEventListener("mouseup", this.upHandler);
+        canvas.addEventListener("mouseout", this.upHandler);
+        canvas.addEventListener("touchstart", this.pressHandler);
+        canvas.addEventListener("touchmove", this.dragHandler);
         document.getElementById("clear").addEventListener("click", this.clearCanvasHandler);
     };
     return BezierCurveTool;

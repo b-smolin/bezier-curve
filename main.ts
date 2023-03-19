@@ -37,6 +37,7 @@ class BezierCurveTool{
     private canvas: HTMLCanvasElement;
     private context: CanvasRenderingContext2D;
     private points: Point[];
+    private currentPoint: Point;
 
     constructor() {
         let canvas = document.getElementById('canvas') as
@@ -50,6 +51,7 @@ class BezierCurveTool{
         this.canvas = canvas;
         this.context = context;
         this.points = [];
+        this.currentPoint = null;
 
         this.redraw();
         this.createUserEvents();
@@ -57,8 +59,12 @@ class BezierCurveTool{
 
     private createUserEvents(): void{
         let canvas = this.canvas
-        canvas.addEventListener("mousedown", this.newPointHandler);
-        canvas.addEventListener("touchstart", this.newPointHandler);
+        canvas.addEventListener("mousedown", this.pressHandler);
+        canvas.addEventListener("mousemove", this.dragHandler);
+        canvas.addEventListener("mouseup", this.upHandler);
+        canvas.addEventListener("mouseout", this.upHandler);
+        canvas.addEventListener("touchstart", this.pressHandler);
+        canvas.addEventListener("touchmove", this.dragHandler);
         document.getElementById("clear").addEventListener("click", this.clearCanvasHandler);
     }
 
@@ -67,6 +73,7 @@ class BezierCurveTool{
         let points = this.points;
         let context = this.context;
         let s = points.length;
+        
         for (let i = 0 ; i < s ; i++){
             context.beginPath();
             context.arc(points[i].x, points[i].y, 7, 0, 2*Math.PI);
@@ -74,6 +81,7 @@ class BezierCurveTool{
             context.fill();
             context.stroke();
         }
+
         if(this.points.length >= 2){
            let curve = this.getCurve();
            for (let i = 1 ; i < curve.length ; i++){
@@ -99,9 +107,32 @@ class BezierCurveTool{
         this.context.clearRect(0, 0, this.canvas.width, this.canvas.height);
     }
 
-    private newPointHandler = (e: MouseEvent) => {
-        this.points.push(new Point(e.pageX, e.pageY))
+    private pressHandler = (e: MouseEvent | TouchEvent) => {
+        let x = (e as TouchEvent).changedTouches ? 
+            (e as TouchEvent).changedTouches[0].pageX : 
+            (e as MouseEvent).pageX;
+        let y = (e as TouchEvent).changedTouches ? 
+            (e as TouchEvent).changedTouches[0].pageY : 
+            (e as MouseEvent).pageY;
+        this.points.push(new Point(x, y))
+        this.currentPoint = this.points[this.points.length-1];
         this.redraw();
+    }
+
+    private dragHandler = (e: MouseEvent | TouchEvent) => {
+        let x = (e as TouchEvent).changedTouches ? 
+            (e as TouchEvent).changedTouches[0].pageX : 
+            (e as MouseEvent).pageX;
+        let y = (e as TouchEvent).changedTouches ? 
+            (e as TouchEvent).changedTouches[0].pageY : 
+            (e as MouseEvent).pageY;
+        this.currentPoint.x = x;
+        this.currentPoint.y = y;
+        this.redraw();
+    }
+
+    private upHandler = () => {
+        this.currentPoint = null;
     }
 
 }

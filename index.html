@@ -1,24 +1,34 @@
 <html>
     <head>
         <title>Bezier Curve Demo</title>
+        <link rel="stylesheet" href="styles.css">
     </head>
     <body>
-        <div>
-        <canvas id="canvas" width="800" height="600"
-                style="border: 1px solid black;">
-        </canvas>
-    </div>
     <div>
-        <div>
-        <button id="clear">Clear All Points</button>
+        <h1>Bezier Curve Demo</h1>    
+        <div id="interactive-container">
+            <canvas id="canvas" width="800" height="600"></canvas>
+            <div id="tools">
+                <div>
+                    <button id="clear">Clear All Points</button>
+                </div>
+                <div>
+                    <input type="checkbox" id="toggle" name="toggle"> Show all linear interpolations?    
+                </div>
+                <div>
+                    <input type="checkbox" id="delete" name="delete"> Delete mode
+                </div>
+            </div>
+        </div>
     </div>
-    <div>
-        <input type="checkbox" id="toggle" name="toggle"> Show all linear interpolations?
-    </div>
-    <div>
-        <input type="checkbox" id="delete" name="delete"> Delete mode
-    </div>
-    </div>
+    <p>
+        Ever since learning about them, I always appreciated the elegance of Bezier Curves. This tool lets you get a 
+        feel for how they work by letting you place, move, and delete points used to define a curve. You can toggle displaying
+        all of the linear interpolations used to build the curve.
+    </p>
+    <p>
+        Traditionally, Bezier Curves are represented by the recursion relation
+    </p>
         <script src="main.js"></script>
     </body>
 </html>

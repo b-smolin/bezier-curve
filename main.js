@@ -102,13 +102,13 @@ var BezierCurveTool = /** @class */ (function () {
             x -= _this.canvas.offsetLeft;
             y -= _this.canvas.offsetTop;
             var i = _this.points.findIndex(function (point) {
-                return pointDistance(point, new Point(x, y)) < POINTRADIUS;
+                return pointDistance(point, new Point(x, y)) <= (POINTRADIUS + 1);
             });
             if (i < 0 && !_this.deleteMode.checked) {
                 _this.points.push(new Point(x, y));
                 _this.currentPoint = _this.points[_this.points.length - 1];
             }
-            else if (_this.deleteMode.checked) {
+            else if (i >= 0 && _this.deleteMode.checked) {
                 _this.points.splice(i, 1);
             }
             else {
@@ -120,15 +120,15 @@ var BezierCurveTool = /** @class */ (function () {
         };
         this.dragHandler = function (e) {
             if (_this.currentPoint) {
-                var x_1 = e.changedTouches ?
+                var x = e.changedTouches ?
                     e.changedTouches[0].pageX :
                     e.pageX;
                 var y = e.changedTouches ?
                     e.changedTouches[0].pageY :
                     e.pageY;
-                x_1 -= _this.canvas.offsetLeft;
+                x -= _this.canvas.offsetLeft;
                 y -= _this.canvas.offsetTop;
-                _this.currentPoint.x = x_1;
+                _this.currentPoint.x = x;
                 _this.currentPoint.y = y;
                 _this.redraw();
             }
@@ -165,5 +165,5 @@ var BezierCurveTool = /** @class */ (function () {
     };
     return BezierCurveTool;
 }());
-var x = new BezierCurveTool();
+new BezierCurveTool();
 //# sourceMappingURL=main.js.map

@@ -26,7 +26,7 @@ function deCasteljau(points: Point[], t: number): Point{
     return working[0];
 }
 
-function weightedAdd(t1: number, p1: Point, t2: number, p2: Point){
+function weightedAdd(t1: number, p1: Point, t2: number, p2: Point): Point{
     let x1 = t1*p1.x;
     let y1 = t1*p1.y;
     let x2 = t2*p2.x;
@@ -34,7 +34,7 @@ function weightedAdd(t1: number, p1: Point, t2: number, p2: Point){
     return new Point((x1+x2),(y1+y2));
 }
 
-function pointDistance(p1: Point, p2: Point): Number{
+function pointDistance(p1: Point, p2: Point): number{
     let xDelta = p1.x - p2.x;
     let yDelta = p1.y - p2.y;
     return Math.sqrt((xDelta**2 + yDelta**2));
@@ -69,7 +69,7 @@ class BezierCurveTool{
     }
 
     private createUserEvents(): void{
-        let canvas = this.canvas
+        const canvas = this.canvas
 
         canvas.addEventListener("mousedown", this.pressHandler);
         canvas.addEventListener("mousemove", this.dragHandler);
@@ -159,13 +159,13 @@ class BezierCurveTool{
         x -= this.canvas.offsetLeft;
         y -= this.canvas.offsetTop;
         let i = this.points.findIndex((point) => {
-            return pointDistance(point, new Point(x, y)) < POINTRADIUS;
+            return pointDistance(point, new Point(x, y)) <= (POINTRADIUS+1);
         })
         if(i < 0 && !this.deleteMode.checked){
             this.points.push(new Point(x, y))
             this.currentPoint = this.points[this.points.length-1];
         }
-        else if(this.deleteMode.checked){
+        else if(i >= 0 && this.deleteMode.checked){
             this.points.splice(i,1);
         }else{
             this.currentPoint = this.points[i];
@@ -198,4 +198,4 @@ class BezierCurveTool{
 
 }
 
-let x = new BezierCurveTool();
+new BezierCurveTool();
